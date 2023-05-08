@@ -9,6 +9,7 @@ from MCTS import MCTS
 class TestPlayoutAndBackpropagate(unittest.TestCase):
     def setUp(self):
         self.tree = MCTS()
+        self.tree.board.reset()
         self.board = self.tree.board
 
         # fool's mate
@@ -22,8 +23,23 @@ class TestPlayoutAndBackpropagate(unittest.TestCase):
         self.winner = self.board.outcome().winner
     
     def test_playout(self):
-        pass
-    
+        self.tree.board = chess.Board()
+        self.tree.board.reset()
+        self.board = self.tree.board
+        self.tree.board.push_san('e4')
+
+        self.stack_before = self.board.move_stack[:]
+        self.fen_before = self.board.fen()
+
+        for i in range(2):
+            self.tree.playout()
+
+        self.assertEqual('e2e4', self.board.move_stack[0].uci())
+        self.assertEqual(2, self.tree.positions[self.board.fen()][1])
+        for i in zip(self.stack_before, self.board.move_stack):
+            print(i[0], i[1])
+            self.assertEqual(i[0], i[1])
+
     def test_break_backpropagate(self):
         self.tree.board = chess.Board()
         with self.assertRaises(RuntimeError):

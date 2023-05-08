@@ -15,15 +15,11 @@ class MCTS:
         heuristics = []
         parent_fen = self.board.fen()
         for move in self.board.legal_moves:
-            # print(f'18 {move}')
             children.append(move)
             self.board.push(move)
-            # print(f'21 {self.board.move_stack}')
             if self.get_plays() == 0:
                 self.playout()
-            # print(f'24 {self.board.move_stack}')
             heuristics.append(self.heuristic(parent_fen))
-            # print(f'26 {self.board.move_stack}')
             self.board.pop()
         
         # get best child
@@ -59,8 +55,8 @@ class MCTS:
         self.backpropagate()
 
         # restore old board attributes
-        self.board.set_fen(restore_fen)
-        self.board.move_stack = stack
+        for move in stack:
+            self.board.push(move)
 
     def backpropagate(self):
         if not self.board.outcome():
@@ -71,6 +67,7 @@ class MCTS:
         else: # draw
             result = 0
 
+        # print(self.board.move_stack)
         for i in range(len(self.board.move_stack), -1, -1): # stop at -1 since we have (len(stack) + 1) positions
             if result == 1 or result == 0: # got checkmated or drew
                 self.add_loss()
@@ -79,8 +76,7 @@ class MCTS:
             result *= -1
             if i > 0:
                 self.board.pop()
-
-
+                    
     def add_win(self, fen=None):
         if fen is None:
             fen = self.board.fen()
