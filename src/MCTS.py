@@ -43,18 +43,13 @@ class MCTS:
 
     # randomly move until end
     def playout(self):
-        # hold current board attributes
-        restore_fen = self.board.fen()
         stack = self.board.move_stack[:]
 
-        # push random moves until outcome reached
         while not self.board.is_game_over():
             self.board.push(random.choice(list(self.board.legal_moves)))
 
-        # backpropagate result of playout throughout tree and restore board attributes
         self.backpropagate()
 
-        # restore old board attributes
         for move in stack:
             self.board.push(move)
 
@@ -67,7 +62,6 @@ class MCTS:
         else: # draw
             result = 0
 
-        # print(self.board.move_stack)
         for i in range(len(self.board.move_stack), -1, -1): # stop at -1 since we have (len(stack) + 1) positions
             if result == 1 or result == 0: # got checkmated or drew
                 self.add_loss()

@@ -37,7 +37,6 @@ class TestPlayoutAndBackpropagate(unittest.TestCase):
         self.assertEqual('e2e4', self.board.move_stack[0].uci())
         self.assertEqual(2, self.tree.positions[self.board.fen()][1])
         for i in zip(self.stack_before, self.board.move_stack):
-            print(i[0], i[1])
             self.assertEqual(i[0], i[1])
 
     def test_break_backpropagate(self):
