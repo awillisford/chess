@@ -1,4 +1,5 @@
 import chess
+import chess.pgn
 import math
 import numpy
 import random
@@ -28,8 +29,13 @@ class MCTS:
         # backpropagate result if terminal node
         self.board.push(best)
         if self.board.is_game_over():
+            stack = self.board.move_stack[:-1]
             self.backpropagate()
-        self.board.pop()
+            for move in stack:
+                self.board.push(move)
+        else:
+            self.board.pop()
+        print(f'best stack = {self.board.move_stack}\n', flush=True)
 
         return best
 
@@ -44,6 +50,7 @@ class MCTS:
     # randomly move until end
     def playout(self):
         stack = self.board.move_stack[:]
+        print(f'playout stack = {stack}\n')
 
         while not self.board.is_game_over():
             self.board.push(random.choice(list(self.board.legal_moves)))
@@ -52,6 +59,7 @@ class MCTS:
 
         for move in stack:
             self.board.push(move)
+
 
     def backpropagate(self):
         if not self.board.outcome():
@@ -71,6 +79,7 @@ class MCTS:
             if i > 0:
                 self.board.pop()
                     
+
     def add_win(self, fen=None):
         if fen is None:
             fen = self.board.fen()
@@ -101,22 +110,22 @@ class MCTS:
         return self.positions[fen][1]
 
 
-def moveStack_toString(board):
-    moves = ''
-    for i, move in enumerate(board.move_stack):
-        if (i % 2 == 0):
-            moves += '\n' + (i + 1) + '.' # add move num
-        moves += ' ' + move.san()
-    return moves
-
-
 if __name__ == '__main__':
     NUM_GAMES = 1
+    
     board = chess.Board()
     tree = MCTS(board)
+    
+    game_result = chess.pgn.Game()
+    game_result.setup(board)
+
     for game in range(NUM_GAMES):
         print(f'Game ({game})')
         while not board.is_game_over():
+            print(f'{board.fullmove_number} ',)
             move = tree.best_move()
             board.push(move)
-        print(moveStack_toString(board))
+            game_result.add_variation(move)
+
+        game_result.headers["Result"] = board.result()
+        print(game_result)
