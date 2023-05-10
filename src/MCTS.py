@@ -9,7 +9,7 @@ class MCTS:
         self.board = board
         self.C = C # exploration constant for UCB1
         self.positions = {} # [0] = wins, [1] = plays
-    
+
 
     def best_move(self):
         children = []
@@ -35,7 +35,7 @@ class MCTS:
                 self.board.push(move)
         else:
             self.board.pop()
-        print(f'best stack = {self.board.move_stack}\n', flush=True)
+        # print(f'best stack = {self.board.move_stack}\n', flush=True)
 
         return best
 
@@ -50,7 +50,7 @@ class MCTS:
     # randomly move until end
     def playout(self):
         stack = self.board.move_stack[:]
-        print(f'playout stack = {stack}\n')
+        # print(f'playout stack = {stack}\n')
 
         while not self.board.is_game_over():
             self.board.push(random.choice(list(self.board.legal_moves)))
@@ -115,17 +115,11 @@ if __name__ == '__main__':
     
     board = chess.Board()
     tree = MCTS(board)
-    
-    game_result = chess.pgn.Game()
-    game_result.setup(board)
 
     for game in range(NUM_GAMES):
         print(f'Game ({game})')
         while not board.is_game_over():
-            print(f'{board.fullmove_number} ',)
             move = tree.best_move()
             board.push(move)
-            game_result.add_variation(move)
 
-        game_result.headers["Result"] = board.result()
-        print(game_result)
+        print(chess.pgn.Game().from_board(board))
