@@ -22,6 +22,7 @@ class TestPlayoutAndBackpropagate(unittest.TestCase):
         self.fen_before = self.board.fen()
         self.winner = self.board.outcome().winner
     
+
     def test_playout(self):
         self.tree.board = chess.Board()
         self.tree.board.reset()
@@ -39,10 +40,12 @@ class TestPlayoutAndBackpropagate(unittest.TestCase):
         for i in zip(self.stack_before, self.board.move_stack):
             self.assertEqual(i[0], i[1])
 
+
     def test_break_backpropagate(self):
         self.tree.board = chess.Board()
         with self.assertRaises(RuntimeError):
             self.tree.backpropagate()
+
 
     def test_backpropagate(self):
         self.tree.backpropagate()
@@ -75,5 +78,6 @@ class TestPlayoutAndBackpropagate(unittest.TestCase):
         self.assertEqual(self.tree.positions[temp.fen()][0], 1)
         self.assertEqual(self.tree.positions[temp.fen()][1], 1)
     
+
 if __name__ == '__main__':
     unittest.main()
