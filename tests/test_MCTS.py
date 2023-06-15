@@ -1,5 +1,6 @@
 import unittest
-import chess 
+import chess
+import math
 import sys, os
 
 sys.path.append(os.path.join(os.path.dirname(sys.path[0]), 'src'))
@@ -30,13 +31,13 @@ class TestPlayoutAndBackpropagate(unittest.TestCase):
         self.tree.board.push_san('e4')
 
         self.stack_before = self.board.move_stack[:]
-        self.fen_before = self.board.fen()
 
         for i in range(2):
             self.tree.playout()
 
         self.assertEqual('e2e4', self.board.move_stack[0].uci())
-        self.assertEqual(2, self.tree.positions[self.board.fen()][1])
+        self.assertEqual(2, self.tree.positions[self.board.fen()][1]) # check num of plays
+        
         for i in zip(self.stack_before, self.board.move_stack):
             self.assertEqual(i[0], i[1])
 
@@ -77,7 +78,29 @@ class TestPlayoutAndBackpropagate(unittest.TestCase):
         temp.push_san('e3')
         self.assertEqual(self.tree.positions[temp.fen()][0], 1)
         self.assertEqual(self.tree.positions[temp.fen()][1], 1)
-    
+        
+
+    def test_heuristic(self):
+        self.board = chess.Board('8/2k5/P7/8/8/3pq3/8/3K4 w - - 0 1')
+        self.tree = MCTS(self.board)
+        
+        # make sure a7 isnt in positions 
+        self.board.push_san('a7')
+        self.assertEqual(self.tree.positions.get(self.board.fen(), 0), 0)
+        self.board.pop()
+        
+        self.assertEqual(chess.Move(chess.parse_square('a6'), chess.parse_square('a7')), self.tree.best_move())
+        
+        parent_fen = self.board.fen()
+        self.board.push_san('a7')
+        self.assertIn(self.tree.heuristic(parent_fen), [0.0, 1.0])
+        
+        self.tree.positions.pop(self.board.fen())
+        self.tree.add_win()
+        self.tree.add_loss()
+        self.tree.add_loss(parent_fen) # add play (win or loss) to parent
+        self.assertTrue(abs(self.tree.heuristic(parent_fen) - 1.33255) < .00001)
+
 
 if __name__ == '__main__':
     unittest.main()
