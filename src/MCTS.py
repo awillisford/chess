@@ -47,10 +47,9 @@ class MCTS:
         return win_percentage + exploration
 
 
-    # randomly move until end
+    # randomly move until end and backpropagate move data to self.positions
     def playout(self):
         stack = self.board.move_stack[:]
-        # print(f'playout stack = {stack}\n')
 
         while not self.board.is_game_over():
             self.board.push(random.choice(list(self.board.legal_moves)))
@@ -61,6 +60,7 @@ class MCTS:
             self.board.push(move)
 
 
+    # backpropagate move data to self.positions
     def backpropagate(self):
         if not self.board.outcome():
             raise RuntimeError('Game is not over, cannot backpropagate.')
